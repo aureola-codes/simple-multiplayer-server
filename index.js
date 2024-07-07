@@ -1,108 +1,69 @@
 const socketio = require('socket.io');
 const config = require('./config');
 
-const ServerState = require('./classes/ServerState');
+const Match = require('./classes/Match');
+const Player = require('./classes/Player');
 
 const io = socketio();
 
-const serverState = new ServerState();
+let match;
+let player;
+
+let matches = [];
+let players = [];
 
 io.on('connection', socket => {
-    // TODO: Check if number of players allowed.
-    // TODO: Check auth.
+    // Check if the player is allowed to connect.
+    const authToken = socket.handshake.auth.token;
+    if (config.authToken !== "" && authToken !== config.authToken) {
+        socket.disconnect();
+        return;
+    }
 
-    let match;
-    let player = serverState.addPlayer(socket.handshake.query.id, socket.handshake.query.name, socket.id);
+    // Check if the number of players exceeds the maximum.
+    if (players.length >= config.maxPlayers) {
+        socket.disconnect();
+        return;
+    }
 
+    // Add new player to the players registry.
+    let player = new Player(socket.id, 'Player');
+    players[socket.id] = player;
+
+    // Add the player to the lobby.
     socket.join('lobby');
-    socket.emit('matches:list', {"matches": serverState.getMatchesPublic()});
 
-    socket.on('matches:create', matchData => {
-        console.log('matches:start', matchData);
-
-        try {
-            if (match !== null) {
-                throw new Error('Player has already joined a match.');
-            }
-
-            match = serverState.createMatch(matchData);
-
-            socket.leave('lobby');
-            socket.join(match.id);
-
-            io.in('lobby').emit('matches:list', serverState.getMatchesPublic());
-        } catch (errorMessage) {
-            socket.emit('error', {message: errorMessage});
-        }
+    socket.on('chat-message', message => {
+        // Send the message to all players in the lobby or match.
+        io.to(match ? match.getRoom() : 'lobby').emit('chat-message', {
+            player: player,
+            message: message
+        });
     });
 
-    socket.on('matches:join', joinData => {
-        console.log('matches:join', joinData);
-
-        try {
-            if (match !== null) {
-                throw new Error('Player has already joined a match.');
-            }
-
-            match = serverState.joinMatch(joinData.match, joinData.password, player);
-
-            socket.leave('lobby');
-            socket.join(matchData.id);
-        } catch (errorMessage) {
-            socket.emit('error', {message: errorMessage});
+    socket.on('match-create', (matchData, callback) => {
+        if (match) {
+            callback({ message: 'You are already in a match.' });
+            return;
         }
-    });
 
-    socket.in('matches:start', () => {
-        console.log('matches:start', match);
+        match = new Match(matchData, player);
+        matches.push(match);
 
-        try {
-            if (match === null) {
-                throw new Error('Player is not part of a match.');
-            }
+        socket.leave('lobby');
+        socket.join(match.getRoom());
 
-            serverState.startMatch(match.id, player.id);
-
-            io.in(match.id).emit('match:started');
-        } catch (errorMessage) {
-            socket.emit('error', {message: errorMessage});
-        }
-    });
-
-    socket.on('matches:leave', () => {
-        console.log('matches:leave', match);
-
-        try {
-            if (match === null) {
-                throw new Error('Player is not part of a match.');
-            }
-
-            if (match.isOwner(player.id)) {
-                serverState.cancelMatch(match.id);
-
-                io.in(match.id).emit('match:canceled');
-                io.in('lobby').emit('matches:list', serverState.getMatches());
-            } else {
-                serverState.leaveMatch(match.id, player);
-                socket.leave(match.id);
-
-                io.in(match.id).emit('match:updated');
-            }
-
-            socket.join('lobby');
-    
-            match = null;
-        } catch (errorMessage) {
-            socket.emit('error', {message: errorMessage});
-        }
+        callback(match.getCreateResponse());
+        
+        io.to('lobby').emit('matches-updated', () => matches.filter(match => match.isVisible()).map(match => match.getCreateResponse()));
     });
 
     socket.on('reconnect', () => {
-        console.log('test');
+        
     });
 
     socket.on('disconnect', reason => {
-        serverState.removePlayer(player);
+        players = players.filter(p => p.id !== socket.id);
     });
 });
 

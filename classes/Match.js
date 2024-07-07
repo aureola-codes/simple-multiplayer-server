@@ -1,29 +1,26 @@
 const config = require('../config');
 
 class Match {
-    constructor(matchData) {
-        this.id = this.getRandomIdentifier();
+    constructor(matchData, player) {
+        this.id = player.id;
         this.name = matchData.name;
-        this.password = matchData.password;
-        this.isProtected = !!matchData.password;
-        this.isPrivate = matchData.isPrivate;
-        this.isStarted = false;
-        this.maxPlayers = config.maxPlayersPerMatch;
-        if (matchData.maxPlayers) {
-            this.maxPlayers = Match.max(2, Math.min(config.maxPlayersPerMatch, Math.abs(matchData.maxPlayers)));
-        }
+        this.password = matchData.password || "";
+
+        this.isPrivate = matchData.isPrivate || false;
+        this.isProtected = this.password !== "";
+
         this.numPlayers = 0;
-        this.owner = null;
+        this.maxPlayers = config.maxPlayersPerMatch;
+        if (matchData.maxPlayers > 0 && matchData.maxPlayers < config.maxPlayersPerMatch) {
+            this.maxPlayers = matchData.maxPlayers;
+        }
+
         this.players = [];
-        this.chat = [];
+        this.addPlayer(player);
     }
 
-    setOwner(playerData) {
-        this.owner = playerData.id;
-    }
-
-    isOwner(playerId) {
-        return this.owner = playerId;
+    getRoom() {
+        return "match_" + this.id;
     }
 
     authorize(password) {
@@ -48,13 +45,30 @@ class Match {
         this.numPlayers = this.players.length;
     }
 
-    getRandomIdentifier(digits = 8) {
-        let randomNumberString = '';
-        for (let i = 0; i < digits; i++) {
-            randomNumberString += Math.floor(Math.random() * 10);
-        }
+    isVisible() {
+        return !this.isPrivate;
+    }
     
-        return randomNumberString;
+    getCreateResponse() {
+        return {
+            id: this.id,
+            name: this.name,
+            isPrivate: this.isPrivate,
+            isProtected: this.isProtected,
+            numPlayers: this.numPlayers,
+            maxPlayers: this.maxPlayers
+        };
+    }
+
+    getListResponse() {
+        return {
+            id: this.id,
+            name: this.name,
+            isPrivate: this.isPrivate,
+            isProtected: this.isProtected,
+            numPlayers: this.numPlayers,
+            maxPlayers: this.maxPlayers
+        };
     }
 }
 

@@ -19,6 +19,11 @@ class Match {
         this.addPlayer(player);
     }
 
+    getOwner()
+    {
+        return this.id;
+    }
+
     getRoom() {
         return "match_" + this.id;
     }
@@ -48,6 +53,10 @@ class Match {
     isVisible() {
         return !this.isPrivate;
     }
+
+    isOwner(player) {
+        return this.id === player.id;
+    }
     
     getCreateResponse() {
         return {
@@ -56,7 +65,8 @@ class Match {
             isPrivate: this.isPrivate,
             isProtected: this.isProtected,
             numPlayers: this.numPlayers,
-            maxPlayers: this.maxPlayers
+            maxPlayers: this.maxPlayers,
+            players: this.players
         };
     }
 

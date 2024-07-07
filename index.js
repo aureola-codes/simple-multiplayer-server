@@ -27,8 +27,8 @@ io.on('connection', socket => {
     }
 
     // Add new player to the players registry.
-    let player = new Player(socket.id, 'Player');
-    players[socket.id] = player;
+    player = new Player(socket.id, 'Player');
+    players.push(player);
 
     // Add the player to the lobby.
     socket.join('lobby');
@@ -43,7 +43,7 @@ io.on('connection', socket => {
 
     socket.on('match-create', (matchData, callback) => {
         if (match) {
-            callback({ message: 'You are already in a match.' });
+            callback('ERROR: Player already joined a match.');
             return;
         }
 
@@ -54,12 +54,175 @@ io.on('connection', socket => {
         socket.join(match.getRoom());
 
         callback(match.getCreateResponse());
-        
-        io.to('lobby').emit('matches-updated', () => matches.filter(match => match.isVisible()).map(match => match.getCreateResponse()));
+        emitMatchesUpdated();
     });
 
-    socket.on('reconnect', () => {
-        
+    socket.on('match-join', (joinData, callback) => {
+        if (match) {
+            callback('ERROR: Player already joined a match.');
+            return;
+        }
+
+        let joinedMatch = matches.find(match => match.id === joinData.match);
+        if (!joinedMatch) {
+            callback('ERROR: Match not found.');
+            return;
+        }
+
+        try {
+            joinedMatch.authorize(joinData.password);
+        } catch (error) {
+            callback('ERROR: ' + error.message);
+            return;
+        }
+
+        joinedMatch.addPlayer(player);
+        match = joinedMatch;
+
+        io.to(match.getRoom()).emit('player-joined', player);
+
+        socket.leave('lobby');
+        socket.join(match.getRoom());
+
+        callback(match.getCreateResponse());
+    });
+
+    socket.on('match-leave', () => {
+        if (!match) {
+            console.log($`Player ${player.id} is not in a match.`);
+            return;
+        }
+
+        if (match.isOwner(player)) {
+            io.to(match.getRoom()).emit('match-canceled');
+            io.to(match.getRoom()).clients((error, clients) => {
+                clients.forEach(client => {
+                    io.sockets.sockets[client].leave(match.getRoom());
+                    io.sockets.sockets[client].join('lobby');
+                });
+            });
+
+            matches = matches.filter(m => m.id !== match.id);
+            emitMatchesUpdated();
+        } else {
+            match.removePlayer(player.id);
+
+            socket.leave(match.getRoom());
+            socket.join('lobby');
+
+            io.to(match.getRoom()).emit('player-left', player);
+        }
+
+        match = null;
+    });
+
+    socket.on('match-start', () => {
+        if (!match) {
+            console.log($`Player ${player.id} is not in a match.`);
+            return;
+        }
+
+        if (!match.isOwner(player)) {
+            console.log($`Player ${player.id} does not own match ${match.id}.`);
+            return;
+        }
+
+        if (match.isStarted) {
+            console.log($`Match ${match.id} is already started.`);
+            return;
+        }
+
+        match.isStarted = true;
+        io.to(match.getRoom()).emit('match-started');
+    });
+
+    socket.on('match-finish', () => {
+        if (!match) {
+            console.log($`Player ${player.id} is not in a match.`);
+            return;
+        }
+
+        if (!match.isOwner(player)) {
+            console.log($`Player ${player.id} does not own match ${match.id}.`);
+            return;
+        }
+
+        if (!match.isStarted) {
+            console.log($`Match ${match.id} is not started.`);
+            return;
+        }
+
+        io.to(match.getRoom()).emit('match-finished');
+        io.to(match.getRoom()).clients((error, clients) => {
+            clients.forEach(client => {
+                io.sockets.sockets[client].leave(match.getRoom());
+                io.sockets.sockets[client].join('lobby');
+            });
+        });
+
+        matches = matches.filter(m => m.id !== match.id);
+        emitMatchesUpdated();
+
+        match = null;
+    });
+
+    socket.on('match-kick', playerId => {
+        if (!match) {
+            console.log($`Player ${player.id} is not in a match.`);
+            return;
+        }
+
+        if (!match.isOwner(player)) {
+            console.log($`Player ${player.id} does not own match ${match.id}.`);
+            return;
+        }
+
+        if (playerId === player.id) {
+            console.log($`Player ${player.id} cannot kick himself.`);
+            return;
+        }
+
+        match.removePlayer(playerId);
+
+        io.sockets.sockets[client].leave(match.getRoom());
+        io.sockets.sockets[client].join('lobby');
+
+        io.to(match.getRoom()).emit('player-kicked', playerId);
+    });
+
+    socket.on('guest-request', requestData => {
+        if (!match) {
+            console.log($`Player ${player.id} is not in a match.`);
+            return;
+        }
+
+        if (match.isOwner(player)) {
+            console.log($`Owners ${player.id} cannot send guest requests.`);
+            return;
+        }
+
+        io.to(match.getOwner()).emit('guest-request', {
+            type: requestData.type,
+            context: requestData.context,
+            player: player.id
+        });
+    });
+
+    socket.on('host-command', commandData => {
+        if (!match) {
+            console.log($`Player ${player.id} is not in a match.`);
+            return;
+        }
+
+        if (!match.isOwner(player)) {
+            console.log($`Player ${player.id} does not own match ${match.id}.`);
+            return;
+        }
+
+        io.to(commandData.player ? commandData.player : match.getOwner()).emit('host-command', {
+            type: commandData.type,
+            context: commandData.context
+        });
     });
 
     socket.on('disconnect', reason => {
@@ -68,3 +231,11 @@ io.on('connection', socket => {
 });
 
 io.listen(config.serverPort);
+
+const emitMatchesUpdated = () => {
+    let filteredMatches = matches
+        .filter(entry => entry.isVisible())
+        .map(entry => entry.getListResponse());
+
+    io.to('lobby').emit('matches-updated', filteredMatches);
+}

@@ -1,6 +1,6 @@
-const { createServer } = require("http");
-const { Server } = require("socket.io");
-const { instrument } = require("@socket.io/admin-ui");
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const { instrument } = require('@socket.io/admin-ui');
 
 const httpServer = createServer();
 
@@ -15,5 +15,3 @@ instrument(io, {
   auth: false,
   mode: "development",
 });
-
-

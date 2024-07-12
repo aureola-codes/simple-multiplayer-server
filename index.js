@@ -1,41 +1,32 @@
 const socketio = require('socket.io');
 const config = require('./config');
 
-const Match = require('./classes/Match');
-const Player = require('./classes/Player');
+const { Server } = require('./classes');
 
 const io = socketio();
-
-let match;
-let player;
-
-let matches = [];
-let players = [];
+const server = new Server();
 
 io.on('connection', socket => {
-    // Check if the player is allowed to connect.
+    let match;
+    let player;
+
     const authToken = socket.handshake.auth.token;
     if (config.authToken !== "" && authToken !== config.authToken) {
         socket.disconnect();
         return;
     }
 
-    // Check if the number of players exceeds the maximum.
-    if (players.length >= config.maxPlayers) {
+    if (server.numPlayers >= config.maxPlayers) {
         socket.disconnect();
         return;
     }
 
-    // Add new player to the players registry.
-    player = new Player(socket.id, 'Player');
-    players.push(player);
+    player = server.addPlayer(socket.id, 'Player');
 
-    // Add the player to the lobby.
     socket.join('lobby');
 
     socket.on('chat-message', message => {
-        // Send the message to all players in the lobby or match.
-        io.to(match ? match.getRoom() : 'lobby').emit('chat-message', {
+        io.to(match ? match.room : 'lobby').emit('chat-message', {
             player: player,
             message: message
         });
@@ -47,14 +38,13 @@ io.on('connection', socket => {
             return;
         }
 
-        match = new Match(matchData, player);
-        matches.push(match);
+        match = server.addMatch(matchData, player)
 
         socket.leave('lobby');
-        socket.join(match.getRoom());
+        socket.join(match.room);
 
         callback(match.getCreateResponse());
-        emitMatchesUpdated();
+        io.to('lobby').emit('matches-updated', server.getPublicMatches());
     });
 
     socket.on('match-join', (joinData, callback) => {
@@ -63,7 +53,7 @@ io.on('connection', socket => {
             return;
         }
 
-        let joinedMatch = matches.find(match => match.id === joinData.match);
+        let joinedMatch = server.findMatch(joinData.match);
         if (!joinedMatch) {
             callback('ERROR: Match not found.');
             return;
@@ -79,10 +69,10 @@ io.on('connection', socket => {
         joinedMatch.addPlayer(player);
         match = joinedMatch;
 
-        io.to(match.getRoom()).emit('player-joined', player);
+        io.to(match.room).emit('player-joined', player);
 
         socket.leave('lobby');
-        socket.join(match.getRoom());
+        socket.join(match.room);
 
         callback(match.getCreateResponse());
     });
@@ -94,23 +84,23 @@ io.on('connection', socket => {
         }
 
         if (match.isOwner(player)) {
-            io.to(match.getRoom()).emit('match-canceled');
-            io.to(match.getRoom()).clients((error, clients) => {
+            io.to(match.room).emit('match-canceled');
+            io.to(match.room).clients((error, clients) => {
                 clients.forEach(client => {
-                    io.sockets.sockets[client].leave(match.getRoom());
+                    io.sockets.sockets[client].leave(match.room);
                     io.sockets.sockets[client].join('lobby');
                 });
             });
 
-            matches = matches.filter(m => m.id !== match.id);
-            emitMatchesUpdated();
+            server.removeMatch(match.id);
+            io.to('lobby').emit('matches-updated', server.getPublicMatches());
         } else {
             match.removePlayer(player.id);
 
-            socket.leave(match.getRoom());
+            socket.leave(match.room);
             socket.join('lobby');
 
-            io.to(match.getRoom()).emit('player-left', player);
+            io.to(match.room).emit('player-left', player);
         }
 
         match = null;
@@ -133,7 +123,9 @@ io.on('connection', socket => {
         }
 
         match.isStarted = true;
-        io.to(match.getRoom()).emit('match-started');
+
+        io.to(match.room).emit('match-started');
+        io.to('lobby').emit('matches-updated', server.getPublicMatches());
     });
 
     socket.on('match-finish', () => {
@@ -152,21 +144,21 @@ io.on('connection', socket => {
             return;
         }
 
-        io.to(match.getRoom()).emit('match-finished');
-        io.to(match.getRoom()).clients((error, clients) => {
+        io.to(match.room).emit('match-finished');
+        io.to(match.room).clients((error, clients) => {
             clients.forEach(client => {
-                io.sockets.sockets[client].leave(match.getRoom());
+                io.sockets.sockets[client].leave(match.room);
                 io.sockets.sockets[client].join('lobby');
             });
         });
 
-        matches = matches.filter(m => m.id !== match.id);
-        emitMatchesUpdated();
+        server.removeMatch(match.id);
+        io.to('lobby').emit('matches-updated', server.getPublicMatches());
 
         match = null;
     });
 
-    socket.on('match-kick', playerId => {
+    socket.on('player-kick', playerId => {
         if (!match) {
             console.log($`Player ${player.id} is not in a match.`);
             return;
@@ -184,13 +176,13 @@ io.on('connection', socket => {
 
         match.removePlayer(playerId);
 
-        io.sockets.sockets[client].leave(match.getRoom());
+        io.sockets.sockets[client].leave(match.room);
         io.sockets.sockets[client].join('lobby');
 
-        io.to(match.getRoom()).emit('player-kicked', playerId);
+        io.to(match.room).emit('player-kicked', playerId);
     });
 
-    socket.on('guest-request', requestData => {
+    socket.on('tick', requestData => {
         if (!match) {
             console.log($`Player ${player.id} is not in a match.`);
             return;
@@ -201,14 +193,14 @@ io.on('connection', socket => {
             return;
         }
 
-        io.to(match.getOwner()).emit('guest-request', {
+        io.to(match.owner).emit('tick', {
             type: requestData.type,
             context: requestData.context,
             player: player.id
         });
     });
 
-    socket.on('host-command', commandData => {
+    socket.on('tock', commandData => {
         if (!match) {
             console.log($`Player ${player.id} is not in a match.`);
             return;
@@ -219,23 +211,15 @@ io.on('connection', socket => {
             return;
         }
 
-        io.to(commandData.player ? commandData.player : match.getOwner()).emit('host-command', {
+        io.to(commandData.player ? commandData.player : match.room).emit('tock', {
             type: commandData.type,
             context: commandData.context
         });
     });
 
     socket.on('disconnect', reason => {
-        players = players.filter(p => p.id !== socket.id);
+        server.removePlayer(player.id);
     });
 });
 
 io.listen(config.serverPort);
-
-const emitMatchesUpdated = () => {
-    let filteredMatches = matches
-        .filter(entry => entry.isVisible())
-        .map(entry => entry.getListResponse());
-
-    io.to('lobby').emit('matches-updated', filteredMatches);
-}

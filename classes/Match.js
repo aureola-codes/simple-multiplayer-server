@@ -1,6 +1,6 @@
 const config = require('../config');
 
-class Match {
+module.exports = class Match {
     constructor(matchData, player) {
         this.id = player.id;
         this.name = matchData.name;
@@ -15,17 +15,10 @@ class Match {
             this.maxPlayers = matchData.maxPlayers;
         }
 
+        this.room = 'match_' + this.id;
+        this.owner = player.id;
+
         this.players = [];
-        this.addPlayer(player);
-    }
-
-    getOwner()
-    {
-        return this.id;
-    }
-
-    getRoom() {
-        return "match_" + this.id;
     }
 
     authorize(password) {
@@ -42,12 +35,12 @@ class Match {
 
     addPlayer(playerData) {
         this.players.push(playerData);
-        this.numPlayers = this.players.length;
+        this.numPlayers++;
     }
 
     removePlayer(playerId) {
         this.players = this.players.filter(player => player.id !== playerId);
-        this.numPlayers = this.players.length;
+        this.numPlayers--;
     }
 
     isVisible() {
@@ -81,5 +74,3 @@ class Match {
         };
     }
 }
-
-module.exports = Match;

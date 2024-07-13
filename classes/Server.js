@@ -51,7 +51,7 @@ module.exports = class Server {
     getPublicMatches()
     {
         return this.matches
-            .filter(m => m.isVisible())
-            .map(m => m.getListResponse());
+            .filter(match => match.isVisible())
+            .map(match => match.getMinResponse());
     }
 }

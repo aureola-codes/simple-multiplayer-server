@@ -19,6 +19,7 @@ module.exports = class Match {
         this.owner = player.id;
 
         this.players = [];
+        this.blockedPlayers = [];
     }
 
     authorize(password) {
@@ -28,6 +29,10 @@ module.exports = class Match {
 
         if (this.numPlayers >= this.maxPlayers) {
             throw new Error("Match full.");
+        }
+
+        if (this.blockedPlayers.includes(player.id)) {
+            throw new Error("Player blocked.");
         }
 
         return this;
@@ -43,15 +48,35 @@ module.exports = class Match {
         this.numPlayers--;
     }
 
+    kickPlayer(playerId) {
+        this.blockedPlayers.push(playerId);
+        this.removePlayer(playerId);
+    }
+
     isVisible() {
         return !this.isPrivate;
     }
 
-    isOwner(player) {
-        return this.id === player.id;
+    isOwner(playerId) {
+        return this.owner === playerId;
     }
-    
-    getCreateResponse() {
+
+    hasPlayer(playerId) {
+        return this.players.some(player => player.id === playerId);
+    }
+
+    getMinResponse() {
+        return {
+            id: this.id,
+            name: this.name,
+            isPrivate: this.isPrivate,
+            isProtected: this.isProtected,
+            numPlayers: this.numPlayers,
+            maxPlayers: this.maxPlayers
+        };
+    }
+
+    getFullResponse() {
         return {
             id: this.id,
             name: this.name,
@@ -60,17 +85,6 @@ module.exports = class Match {
             numPlayers: this.numPlayers,
             maxPlayers: this.maxPlayers,
             players: this.players
-        };
-    }
-
-    getListResponse() {
-        return {
-            id: this.id,
-            name: this.name,
-            isPrivate: this.isPrivate,
-            isProtected: this.isProtected,
-            numPlayers: this.numPlayers,
-            maxPlayers: this.maxPlayers
         };
     }
 }

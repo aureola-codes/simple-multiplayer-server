@@ -129,6 +129,8 @@ io.on('connection', socket => {
             io.to(socket._match.room).emit('match-canceled');
 
             removeMatch(socket._match);
+
+            // TODO: Make all players leave the match.
         } else {
             socket._match.removePlayer(socket._player.id);
 
@@ -174,6 +176,9 @@ io.on('connection', socket => {
         io.to(socket._match.room).emit('match-finished');
 
         removeMatch(socket._match);
+
+        // TODO: Make all players leave the match.
+
         emitMatchesUpdated();
     }
 

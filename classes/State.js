@@ -37,12 +37,14 @@ module.exports = class State {
     }
 
     addMatch(matchData, player) {
-        if (!this._matches.hasOwnProperty(matchData.id)) {
-            this._matches[matchData.id] = new Match(matchData, player);
+        let match = new Match(matchData, player);
+        if (!this._matches.hasOwnProperty(match.id)) {
+            this._matches[match.id] = match;
             this._numMatches++;
+            return match;
         }
 
-        return this._matches[matchData.id];
+        return null;
     }
 
     removeMatch(id) {
@@ -55,7 +57,8 @@ module.exports = class State {
     }
 
     getVisibleMatches() {
-        return this._matches
+        return Object
+            .values(this._matches)
             .filter(match => match.isVisible())
             .map(match => match.getMinResponse());
     }

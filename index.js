@@ -119,7 +119,7 @@ io.on('connection', socket => {
 
     function leaveMatch() {
         if (!socket._match) {
-            console.log($`Player ${socket._player.id} is not in a match.`);
+            console.log(`Player ${socket._player.id} is not in a match.`);
             return;
         }
 
@@ -149,7 +149,7 @@ io.on('connection', socket => {
         }
 
         if (socket._match.isStarted) {
-            console.log($`Match ${socket._match.id} is already started.`);
+            console.log(`Match ${socket._match.id} is already started.`);
             return;
         }
 
@@ -165,7 +165,7 @@ io.on('connection', socket => {
         }
 
         if (!socket._match.isStarted) {
-            console.log($`Match ${socket._match.id} is not started.`);
+            console.log(`Match ${socket._match.id} is not started.`);
             return;
         }
 
@@ -181,12 +181,12 @@ io.on('connection', socket => {
         }
 
         if (!socket._match.hasPlayer(playerId)) {
-            console.log($`Player ${playerId} is not in match ${socket._match.id}.`);
+            console.log(`Player ${playerId} is not in match ${socket._match.id}.`);
             return;
         }
 
         if (playerId === socket._player.id) {
-            console.log($`Player ${socket._player.id} cannot kick himself.`);
+            console.log(`Player ${socket._player.id} cannot kick himself.`);
             return;
         }
 
@@ -229,7 +229,7 @@ io.on('connection', socket => {
 
     function hasMatch() {
         if (socket._match === null) {
-            console.log($`Player ${socket._player.id} is not in a match.`);
+            console.log(`Player ${socket._player.id} is not in a match.`);
             return false;
         }
 
@@ -242,7 +242,7 @@ io.on('connection', socket => {
         }
         
         if (!socket._match.isOwner(socket._player.id)) {
-            console.log($`Player ${socket._player.id} does not own match ${socket._match.id}.`);
+            console.log(`Player ${socket._player.id} does not own match ${socket._match.id}.`);
             return false;
         }
 
@@ -255,7 +255,7 @@ io.on('connection', socket => {
         }
         
         if (socket._match.isOwner(socket._player.id)) {
-            console.log($`Owners ${socket._player.id} cannot send guest requests.`);
+            console.log(`Owners ${socket._player.id} cannot send guest requests.`);
             return false;
         }
 

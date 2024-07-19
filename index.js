@@ -23,6 +23,8 @@ io.on('connection', socket => {
 
     socket._player = state.addPlayer(socket.id, 'Player');
 
+    console.log('player:', socket._player);
+
     socket.join('lobby');
 
     socket.on('chat-message', sendChatMessage.bind(this));
@@ -66,6 +68,7 @@ io.on('connection', socket => {
         }
 
         socket._match = state.addMatch(matchData, socket._player);
+        socket._match.addPlayer(socket._player);
 
         socket.leave('lobby');
         socket.join(socket._match.room);
@@ -78,7 +81,7 @@ io.on('connection', socket => {
     }
 
     function joinMatch(joinDataJson, callback) {
-        if (socket._match !== null) {
+        if (socket._match) {
             callback('ERROR: Player already joined a match.');
             return;
         }
@@ -98,7 +101,7 @@ io.on('connection', socket => {
         }
 
         try {
-            joinedMatch.authorize(joinData.password);
+            joinedMatch.authorize(socket._player, joinData.password);
         } catch (error) {
             callback('ERROR: ' + error.message);
             return;
@@ -125,26 +128,23 @@ io.on('connection', socket => {
             return;
         }
 
+        const isVisible = socket._match.isVisible();
         if (socket._match.isOwner(socket._player.id)) {
             io.to(socket._match.room).emit('match-canceled');
 
             removeMatch(socket._match);
-
-            // TODO: Make all players leave the match.
         } else {
             socket._match.removePlayer(socket._player.id);
 
+            socket.join('lobby');
+            socket.leave(socket._match.room);
+
             io.to(socket._match.room).emit('player-left', socket._player);
         }
-
-        socket.join('lobby');
-        socket.leave(socket._match.room);
-
-        if (socket._match.isVisible()) {
+        
+        if (isVisible) {
             emitMatchesUpdated();
         }
-
-        socket._match = null;
     }
 
     function startMatch() {
@@ -285,8 +285,8 @@ function removeMatch(match) {
 
 function resetSocket(otherSocket) {
     otherSocket.join('lobby');
-    otherSocket.leave(match.room);
-
+    otherSocket.leave(otherSocket._match.room);
+    
     otherSocket._match = null;
 }
 

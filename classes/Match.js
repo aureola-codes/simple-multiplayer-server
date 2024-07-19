@@ -22,7 +22,7 @@ module.exports = class Match {
         this.blockedPlayers = [];
     }
 
-    authorize(password) {
+    authorize(player, password) {
         if (this.password !== "" && this.password !== password) {
             throw new Error("Match password mismatch.");
         }

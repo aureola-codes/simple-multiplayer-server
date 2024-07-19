@@ -220,12 +220,11 @@ io.on('connection', socket => {
     }
 
     function updatePlayer(playerDataJson) {
-
         let playerData;
         try {
             playerData = JSON.parse(playerDataJson);
         } catch (error) {
-            console.log('ERROR: Invalid data received.');
+            console.log('ERROR: Invalid data received.', playerDataJson);
             return;
         }
 

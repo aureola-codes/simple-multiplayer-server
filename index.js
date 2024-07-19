@@ -41,6 +41,8 @@ io.on('connection', socket => {
 
     socket.on('disconnect', onDisconnect.bind(this));
 
+    emitMatchesUpdated(socket.id);
+
     function sendChatMessage(message) {
         const room = socket._match ? socket._match.room : 'lobby';
         io.to(room).emit('chat-message', {
@@ -130,11 +132,11 @@ io.on('connection', socket => {
         } else {
             socket._match.removePlayer(socket._player.id);
 
-            socket.join('lobby');
-            socket.leave(socket._match.room);
-
             io.to(socket._match.room).emit('player-left', socket._player);
         }
+
+        socket.join('lobby');
+        socket.leave(socket._match.room);
 
         if (socket._match.isVisible()) {
             emitMatchesUpdated();

@@ -22,6 +22,7 @@ io.on('connection', socket => {
     }
 
     socket._player = state.addPlayer(socket.id, 'Player');
+    socket.emit('init', socket._player.getMinResponse());
 
     console.log('player:', socket._player);
 

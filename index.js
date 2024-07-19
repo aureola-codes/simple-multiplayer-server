@@ -33,6 +33,7 @@ io.on('connection', socket => {
     socket.on('match-leave', leaveMatch.bind(this));
     socket.on('match-start', startMatch.bind(this));
     socket.on('match-finish', finishMatch.bind(this));
+    socket.on('player-update', updatePlayer.bind(this));
     socket.on('player-kick', kickPlayer.bind(this));
 
     socket.on('tick', tick.bind(this));
@@ -207,6 +208,31 @@ io.on('connection', socket => {
         io.to(socket._match.room).emit('player-kicked', playerId);
         if (socket._match.isVisible()) {
             emitMatchesUpdated();
+        }
+    }
+
+    function updatePlayer(playerDataJson) {
+
+        let playerData;
+        try {
+            playerData = JSON.parse(playerDataJson);
+        } catch (error) {
+            console.log('ERROR: Invalid data received.');
+            return;
+        }
+
+        let playerUpdated = false;
+        if (playerData.name && playerData.name !== socket._player.name) {
+            socket._player.name = playerData.name;
+            playerUpdated = true;
+        }
+        if (playerData.isReady !== undefined && playerData.isReady !== socket._player.isReady) {
+            socket._player.isReady = playerData.isReady;
+            playerUpdated = true;
+        }
+
+        if (playerUpdated && socket._match) {
+            io.to(socket._match.room).emit('player-updated', socket._player.getFullResponse());
         }
     }
 

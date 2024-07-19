@@ -136,12 +136,12 @@ io.on('connection', socket => {
 
             removeMatch(socket._match);
         } else {
+            const room = socket._match.room;
             socket._match.removePlayer(socket._player.id);
 
-            socket.join('lobby');
-            socket.leave(socket._match.room);
+            resetSocket(socket);
 
-            io.to(socket._match.room).emit('player-left', socket._player);
+            io.to(room).emit('player-left', socket._player);
         }
         
         if (isVisible) {
@@ -159,10 +159,14 @@ io.on('connection', socket => {
             return;
         }
 
+        const isVisible = socket._match.isVisible();
         socket._match.isStarted = true;
 
         io.to(socket._match.room).emit('match-started');
-        emitMatchesUpdated();
+
+        if (isVisible) {
+            emitMatchesUpdated();
+        }
     }
 
     function finishMatch() {
@@ -176,12 +180,13 @@ io.on('connection', socket => {
         }
 
         io.to(socket._match.room).emit('match-finished');
-
+        
+        const isVisible = socket._match.isVisible();
         removeMatch(socket._match);
 
-        // TODO: Make all players leave the match.
-
-        emitMatchesUpdated();
+        if (isVisible) {
+            emitMatchesUpdated();
+        }
     }
 
     function kickPlayer(playerId) {
@@ -204,9 +209,11 @@ io.on('connection', socket => {
         const otherSocket = io.sockets.sockets.get(playerId);
         if (otherSocket) {
             resetSocket(otherSocket);
+            otherSocket.emit('player-kicked', otherSocket._player.getMinResponse());
         }
-
-        io.to(socket._match.room).emit('player-kicked', playerId);
+        
+        io.to(socket._match.room).emit('player-kicked', otherSocket._player.getMinResponse());
+        
         if (socket._match.isVisible()) {
             emitMatchesUpdated();
         }
@@ -262,7 +269,7 @@ io.on('connection', socket => {
     }
 
     function hasMatch() {
-        if (socket._match === null) {
+        if (!socket._match) {
             console.log(`Player ${socket._player.id} is not in a match.`);
             return false;
         }
@@ -315,6 +322,9 @@ function resetSocket(otherSocket) {
     otherSocket.leave(otherSocket._match.room);
     
     otherSocket._match = null;
+    otherSocket._player.isReady = false;
+
+    emitMatchesUpdated(otherSocket.id);
 }
 
 function emitMatchesUpdated(room = 'lobby') {

@@ -36,13 +36,8 @@ io.on('connection', socket => {
     socket.on('match-finish', finishMatch.bind(this));
     socket.on('player-update', updatePlayer.bind(this));
     socket.on('player-kick', kickPlayer.bind(this));
-
     socket.on('tick', tick.bind(this));
-    socket.on('request', tick.bind(this));
-
     socket.on('tock', tock.bind(this));
-    socket.on('command', tock.bind(this));
-
     socket.on('disconnect', onDisconnect.bind(this));
 
     emitMatchesUpdated(socket.id);

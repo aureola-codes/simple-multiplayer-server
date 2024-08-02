@@ -2,12 +2,31 @@ const Match = require('./Match');
 const Player = require('./Player');
 
 module.exports = class State {
-    constructor() {
+    constructor(config) {
+        this._config = config;
+
         this._players = {};
         this._matches = {};
 
         this._numPlayers = 0;
         this._numMatches = 0;
+    }
+
+    get numPlayers() {
+        return this._numPlayers;
+    }
+
+    get numMatches() {
+        return this._numMatches;
+    }
+
+    get status() {
+        return {
+            numPlayers: this._numPlayers,
+            maxPlayer: this._config.maxPlayers,
+            numMatches: this._numMatches,
+            maxMatches: this._config.maxMatches,
+        };
     }
 
     findPlayer(id) {

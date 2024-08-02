@@ -2,29 +2,34 @@ const config = require('./config');
 const State = require('./classes/State');
 
 const io = require('socket.io')();
-const state = new State();
+const state = new State(config);
 
 io.on('connection', socket => {
-    socket._match;
-    socket._player;
+    console.log(`Player ${socket.id} connected.`);
 
     const authToken = socket.handshake.auth.token;
-    if (config.authToken !== "" && authToken !== config.authToken) {
+    if (config.authToken !== '' && authToken !== config.authToken) {
         socket.emit('error', 'Invalid authentication token.');
-        socket.disconnect();
+        socket.disconnect(true);
+
+        console.warn(`Player ${socket.id} has invalid authentication token.`);
         return;
     }
 
     if (state.numPlayers >= config.maxPlayers) {
         socket.emit('error', 'Server is full.');
-        socket.disconnect();
+        socket.disconnect(true);
+
+        console.warn(`Player ${socket.id} cannot join, server is full.`);
         return;
     }
 
     socket._player = state.addPlayer(socket.id, 'Player');
-    socket.emit('init', socket._player.getMinResponse());
 
-    console.log('player:', socket._player);
+    socket.emit('init', {
+        player: socket._player.getFullResponse(),
+        status: state.status
+    });
 
     socket.join('lobby');
 
@@ -260,6 +265,8 @@ io.on('connection', socket => {
     function onDisconnect(reason) {
         leaveMatch();
         state.removePlayer(socket._player.id);
+
+        console.log(`Player ${socket._player.id} disconnected. Reason: ${reason}`);
     }
 
     function hasMatch() {
@@ -299,6 +306,8 @@ io.on('connection', socket => {
 });
 
 io.listen(config.port);
+
+console.log(`Server started! Listening on port: ${config.port}`);
 
 function removeMatch(match) {
     for (let player of match.players) {

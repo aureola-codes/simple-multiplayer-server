@@ -2,6 +2,12 @@
 
 ## Installation
 
+Copy the `.env.example` file to `.env` and adjust the configuration to your needs.
+
+```bash
+cp .env.example .env
+```
+
 ### Local / Development
 
 Prerequisites: [Node.js](https://nodejs.org/en/), [nodemon](https://nodemon.io/)
@@ -9,7 +15,7 @@ Prerequisites: [Node.js](https://nodejs.org/en/), [nodemon](https://nodemon.io/)
 1. Clone the repository or download the source code.
 2. Run `npm install` in the root directory of the project.
 3. Run `npm start` to start the server.
-4. The server will be available at `http://localhost:9000`.
+4. The websocket will be available at `ws://localhost:9000`.
 
 ### Docker
 
@@ -17,7 +23,7 @@ Prerequisites: [Docker](https://www.docker.com/)
 
 1. Clone the repository or download the source code.
 2. Run `docker compose up --build` in the root directory of the project.
-3. The server will be available at `http://localhost:9000`.
+3. The websocket will be available at `ws://localhost:9000`.
 
 ## Configuration
 

@@ -28,6 +28,9 @@ RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=cache,target=/root/.npm \
     npm ci --omit=dev
 
+# Install nodemon globally
+RUN npm install -g nodemon
+
 # Run the application as a non-root user.
 USER node
 
@@ -37,5 +40,5 @@ COPY . .
 # Expose the port that the application listens on.
 EXPOSE ${PORT}
 
-# Run the application.
-CMD npm start
+# Run the application using nodemon.
+CMD nodemon --watch . --exec "npm start"

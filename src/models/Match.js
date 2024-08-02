@@ -10,10 +10,7 @@ module.exports = class Match {
         this.isProtected = this.password !== '';
 
         this.numPlayers = 0;
-        this.maxPlayers = config.maxPlayersPerMatch;
-        if (maxPlayers > 0 && maxPlayers < config.maxPlayersPerMatch) {
-            this.maxPlayers = maxPlayers;
-        }
+        this.maxPlayers = maxPlayers;
 
         this.room = 'match_' + this.id;
 

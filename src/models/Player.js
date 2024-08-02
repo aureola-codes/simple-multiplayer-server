@@ -1,7 +1,8 @@
 module.exports = class Player {
-    constructor(id, name) {
+    constructor(id, name, data = {}) {
         this.id = id;
         this.name = name;
+        this.data = data;
         this.isReady = false;
     }
 
@@ -16,6 +17,7 @@ module.exports = class Player {
         return {
             id: this.id,
             name: this.name,
+            data: this.data,
             isReady: this.isReady
         };
     }

@@ -60,8 +60,8 @@ in the same match or lobby as the sender. Messages will not be stored on the ser
 
 **Important:** Messages that are too short will be dropped. Messages that are too long will be truncated.
 
-| Property | Type | Description |
-| --- | --- | --- |
+| Property  | Type                | Description                      |
+|-----------|---------------------|----------------------------------|
 | `message` | `string` `required` | The message that should be sent. |
 
 Example:
@@ -92,12 +92,12 @@ socket.emit('status', (status) => {
 
 Create a new match on the server. The player that creates the match will automatically join it.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | `string` `required` | The name of the match. |
-| `password` | `string` `optional` | The password of the match, if it should be protected. |
-| `isPrivate` | `boolean` `optional` | Whether the match should be private. |
-| `maxPlayers` | `number` `optional` | The maximum number of players that can join the match. |
+| Property     | Type                 | Description                                            |
+|--------------|----------------------|--------------------------------------------------------|
+| `name`       | `string` `required`  | The name of the match.                                 |
+| `password`   | `string` `optional`  | The password of the match, if it should be protected.  |
+| `isPrivate`  | `boolean` `optional` | Whether the match should be private.                   |
+| `maxPlayers` | `number` `optional`  | The maximum number of players that can join the match. |
 
 Acknowledgment:
 
@@ -121,9 +121,9 @@ socket.emit('match-create', { name: 'My Match', maxPlayers: 4 }, (response) => {
 
 Join an existing match on the server. The player will be added to the match if it exists and is not full.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `match` | `string` `required` | The unique identifier of the match. |
+| Property   | Type                | Description                                    |
+|------------|---------------------|------------------------------------------------|
+| `match`    | `string` `required` | The unique identifier of the match.            |
 | `password` | `string` `optional` | The password of the match, if it is protected. |
 
 Acknowledgment:
@@ -181,10 +181,10 @@ socket.emit('match-finish');
 
 Update the player's data. The data will be broadcasted to all players in the same match or lobby. You just need to send the properties that you want to update. The player's data will be merged with the new data.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | `string` `optional` | The new name of the player. |
-| `data` | `object` `optional` | The new additional data of the player. |
+| Property  | Type                 | Description                                   |
+|-----------|----------------------|-----------------------------------------------|
+| `name`    | `string` `optional`  | The new name of the player.                   |
+| `data`    | `object` `optional`  | The new additional data of the player.        |
 | `isReady` | `boolean` `optional` | Whether the player is ready to start a match. |
 
 Example:
@@ -198,8 +198,8 @@ socket.emit('player-update', { isReady: true });
 
 Kick a player from the current match. The player will be removed from the match and will be added to the lobby. The player will be notified that they were kicked. Only the owner of the match can kick players.
 
-| Property | Type | Description |
-| --- | --- | --- |
+| Property | Type                | Description                                                |
+|----------|---------------------|------------------------------------------------------------|
 | `player` | `string` `required` | The unique identifier of the player that should be kicked. |
 
 Example:
@@ -215,10 +215,10 @@ Sends a tick to the server. The server will proxy the tick to the owner of the m
 
 **Important:** Ticks can only be sent by guests of the match.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `type` | `string` `required` | The type of the tick. Default: `tick` |
-| `data` | `object` `required` | Context data that should be sent with the tick. |
+| Property  | Type                | Description                                     |
+|-----------|---------------------|-------------------------------------------------|
+| `type`    | `string` `required` | The type of the tick. Default: `tick`           |
+| `data`    | `object` `required` | Context data that should be sent with the tick. |
 
 Example:
 
@@ -233,11 +233,11 @@ Send a tock to the server. The server will either broadcast the tock to all play
 
 **Important:** Tocks can only be sent by the owner of the match.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `type` | `string` `required` | The type of the tock. Default: `tock` |
-| `data` | `object` `required` | Context data that should be sent with the tock. |
-| `player` | `string` `optional` | The unique identifier of the player that should receive the tock. |
+| Property  | Type                | Description                                                       |
+|-----------|---------------------|-------------------------------------------------------------------|
+| `type`    | `string` `required` | The type of the tock. Default: `tock`                             |
+| `data`    | `object` `required` | Context data that should be sent with the tock.                   |
+| `player`  | `string` `optional` | The unique identifier of the player that should receive the tock. |
 
 Example:
 
@@ -254,8 +254,8 @@ Events that are sent from the server to the client.
 
 Sends the initial data to the client. The client can use this data to initialize the game state. The initial data includes the player & the list of matches.
 
-| Property | Type | Description |
-| --- | --- | --- |
+| Property | Type     | Description                                           |
+|----------|----------|-------------------------------------------------------|
 | `player` | `Player` | The player that is currently connected to the server. |
 
 Example:
@@ -274,10 +274,10 @@ socket.on('init', (data) => {
 
 Sends an alert to the client. Alerts are used to notify the client about important events. Alerts can be used to notify the client about maintenance, warnings, server errors or other important events.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `type` | `string` | The type of the alert. Types: `error`, `warning`, `status` |
-| `message` | `string` | The message that should be displayed. |
+| Property  | Type     | Description                                                |
+|-----------|----------|------------------------------------------------------------|
+| `type`    | `string` | The type of the alert. Types: `error`, `warning`, `status` |
+| `message` | `string` | The message that should be displayed.                      |
 
 Example:
 
@@ -295,10 +295,10 @@ socket.on('alert', (data) => {
 
 Sends a chat message to the client. Received chat messages will be displayed in the chat window of the client.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `player` | `Player` | The player that sent the message. |
-| `message` | `string` | The message that was sent. |
+| Property  | Type     | Description                       |
+|-----------|----------|-----------------------------------|
+| `player`  | `Player` | The player that sent the message. |
+| `message` | `string` | The message that was sent.        |
 
 Example:
 
@@ -316,8 +316,8 @@ socket.on('chat-message', (data) => {
 
 Sends an updated list of matches to the client. The client can use this list to display available matches to the player. The list will be updated whenever a match is created, joined, left, started, finished or canceled.
 
-| Property | Type | Description |
-| --- | --- | --- |
+| Property  | Type      | Description                                       |
+|-----------|-----------|---------------------------------------------------|
 | `matches` | `Match[]` | The list of matches that are currently available. |
 
 Example:
@@ -452,18 +452,17 @@ socket.on('player-kicked', (data) => {
 
 Sends a tick to the client. Only the owner of the match will receive the tick. The client can use this event to update the game state and to respond with a tock.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `type` | `string` | The type of the tick. |
-| `data` | `object` | Context data that was sent with the tick. |
-| `player` | `string` | The unique identifier of the player that sent the tick. |
+| Property  | Type     | Description                               |
+|-----------|----------|-------------------------------------------|
+| `type`    | `string` | The type of the tick.                     |
+| `data`    | `object` | Context data that was sent with the tick. |
 
 Example:
 
 ```javascript
 // Listen for the 'tick' event
 socket.on('tick', (data) => {
-  const { type, data, player } = data;
+  const { type, data } = data;
 
   // Update the game state
   // ...
@@ -474,10 +473,10 @@ socket.on('tick', (data) => {
 
 Sends a tock to the client. Only guests of the match will receive the tock. The client can use this event to sync the local game state.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `type` | `string` | The type of the tock. |
-| `data` | `object` | Context data that was sent with the tock. |
+| Property  | Type     | Description                               |
+|-----------|----------|-------------------------------------------|
+| `type`    | `string` | The type of the tock.                     |
+| `data`    | `object` | Context data that was sent with the tock. |
 
 Example:
 
@@ -495,38 +494,38 @@ socket.on('tock', (data) => {
 
 ### Player
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `id` | `string` | The unique identifier of the player. |
-| `name` | `string` | The name of the player. |
-| `data` | `object` `*` | An object that can be used to store additional data. |
-| `isReady` | `boolean` `*` | Whether the player is ready to start a match. |
+| Property  | Type          | Description                                          |
+|-----------|---------------|------------------------------------------------------|
+| `id`      | `string`      | The unique identifier of the player.                 |
+| `name`    | `string`      | The name of the player.                              |
+| `data`    | `object` `*`  | An object that can be used to store additional data. |
+| `isReady` | `boolean` `*` | Whether the player is ready to start a match.        |
 
 `*`: Only available when in a / the same match. Not in lists.
 
 ### Match
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `id` | `string` | The unique identifier of the match. |
-| `name` | `string` | The name of the match. |
-| `isPrivate` | `boolean` | Whether the match is private. Private matches won't show up in the list of matches. |
-| `isProtected` | `boolean` | Whether the match is protected by a password. |
-| `numPlayers` | `number` | The number of players that are currently in the match. |
-| `maxPlayers` | `number` | The maximum number of players that can be in the match. |
-| `context` | `object` `*` | An object that can be used to store additional data. |
-| `players` | `Player[]` `*` | The players that are currently in the match. |
+| Property      | Type           | Description                                                                         |
+|---------------|----------------|-------------------------------------------------------------------------------------|
+| `id`          | `string`       | The unique identifier of the match.                                                 |
+| `name`        | `string`       | The name of the match.                                                              |
+| `isPrivate`   | `boolean`      | Whether the match is private. Private matches won't show up in the list of matches. |
+| `isProtected` | `boolean`      | Whether the match is protected by a password.                                       |
+| `numPlayers`  | `number`       | The number of players that are currently in the match.                              |
+| `maxPlayers`  | `number`       | The maximum number of players that can be in the match.                             |
+| `data`        | `object` `*`   | An object that can be used to store additional data.                                |
+| `players`     | `Player[]` `*` | The players that are currently in the match.                                        |
 
 `*`: Only available when in a / the same match. Not in lists.
 
 ### Status
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `numPlayers` | `number` | The number of players that are currently connected to the server. |
+| Property     | Type     | Description                                                        |
+|--------------|----------|--------------------------------------------------------------------|
+| `numPlayers` | `number` | The number of players that are currently connected to the server.  |
 | `maxPlayers` | `number` | The maximum number of players that can be connected to the server. |
-| `numMatches` | `number` | The number of matches that are currently active on the server. |
-| `maxMatches` | `number` | The maximum number of matches that can be active on the server. |
+| `numMatches` | `number` | The number of matches that are currently active on the server.     |
+| `maxMatches` | `number` | The maximum number of matches that can be active on the server.    |
 
 ## Support
 

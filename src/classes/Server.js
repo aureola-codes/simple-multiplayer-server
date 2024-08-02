@@ -24,7 +24,7 @@ module.exports = class Server {
             console.log(`Player ${socket.id} connected.`);
 
             if (this.authenticate(socket)) {
-                let player = this.registerPlayer(socket);
+                let player = this.createPlayer(socket);
                 if (player) {
                     new Connection(socket, player, this).init();
                 }
@@ -37,6 +37,16 @@ module.exports = class Server {
     }
 
     emitChatMessage(room, message, player) {
+        if (message.length <= this._config.chatMinLength) {
+            console.warn(`Player ${player.id} sent a chat message that is too short.`);
+            return;
+        }
+
+        if (this._config.chatMaxLength > 0 && message.length > this._config.chatMaxLength) {
+            console.warn(`Player ${player.id} sent a chat message that is too long.`);
+            message = message.substring(0, this._config.chatMaxLength - 3) + '...';
+        }
+
         this._io.to(room).emit('chat-message', {
             message: message,
             player: player,
@@ -94,7 +104,7 @@ module.exports = class Server {
         return true;
     }
 
-    registerPlayer(socket) {
+    createPlayer(socket) {
         let player;
         try {
             player = this._players.add(socket.id, 'Player');
@@ -112,7 +122,7 @@ module.exports = class Server {
         this._players.remove(player.id);
     }
 
-    registerMatch(matchData, player) {
+    createMatch(matchData, player) {
         let match = this._matches.add(matchData, player);
         if (match.isVisible()) {
             this.emitMatchesUpdated();

@@ -73,8 +73,7 @@ module.exports = class Connection {
 
         try {
             let matchData = JSON.parse(matchDataJson);
-            this.match = this._server.registerMatch(matchData, this.player);
-            this.match.addPlayer(this.player);
+            this.match = this._server.createMatch(matchData, this.player);
         } catch (error) {
             callback('ERROR: ' + error.message);
             return;
@@ -197,23 +196,15 @@ module.exports = class Connection {
         try {
             playerData = JSON.parse(playerDataJson);
         } catch (error) {
-            console.log('ERROR: Invalid data received.', playerDataJson);
+            console.error('ERROR: Invalid data received.', playerDataJson);
             return;
         }
 
-        let playerUpdated = false;
-        if (playerData.name !== undefined && playerData.name !== this.player.name) {
-            this.player.name = playerData.name;
-            playerUpdated = true;
-        }
-        if (playerData.isReady !== undefined && playerData.isReady !== this.player.isReady) {
-            this.player.isReady = playerData.isReady;
-            playerUpdated = true;
-        }
+        this.player.name = playerData.name || this.player.name;
+        this.player.data = Object.assign({}, this.player.data, playerData.data || {});
+        this.player.isReady = playerData.isReady !== undefined ? playerData.isReady : this.player.isReady;
 
-        if (playerUpdated) {
-            this._server.emitPlayerUpdated(this.room, this.inMatch() ? this.playerDataFull : this.playerDataMin);
-        }
+        this._server.emitPlayerUpdated(this.room, this.inMatch() ? this.playerDataFull : this.playerDataMin);
     }
 
     tick(tickData) {

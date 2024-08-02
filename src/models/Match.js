@@ -1,28 +1,32 @@
 const config = require('../config');
 
 module.exports = class Match {
-    constructor(matchData, player) {
-        this.id = player.id;
-        this.name = matchData.name;
-        this.password = matchData.password || "";
-
-        this.isPrivate = matchData.isPrivate || false;
-        this.isProtected = this.password !== "";
+    constructor(id, name, password = '', isPrivate = false, maxPlayers = 0, data = {}) {
+        this.id = id;
+        this.name = name;
+        this.data = data;
+        this.password = password;
+        this.isPrivate = isPrivate;
+        this.isProtected = this.password !== '';
 
         this.numPlayers = 0;
         this.maxPlayers = config.maxPlayersPerMatch;
-        if (matchData.maxPlayers > 0 && matchData.maxPlayers < config.maxPlayersPerMatch) {
-            this.maxPlayers = matchData.maxPlayers;
+        if (maxPlayers > 0 && maxPlayers < config.maxPlayersPerMatch) {
+            this.maxPlayers = maxPlayers;
         }
 
         this.room = 'match_' + this.id;
-        this.owner = player.id;
 
         this.players = [];
         this.blockedPlayers = [];
     }
 
     addPlayer(playerData) {
+        // We will set the owner of the match to the first player that joins.
+        if (this.numPlayers === 0) {
+            this.owner = playerData.id;
+        }
+
         this.players.push(playerData);
         this.numPlayers++;
     }
@@ -64,6 +68,7 @@ module.exports = class Match {
         return {
             id: this.id,
             name: this.name,
+            data: this.data,
             isPrivate: this.isPrivate,
             isProtected: this.isProtected,
             numPlayers: this.numPlayers,

@@ -1,3 +1,5 @@
+const Player = require('../models/Player');
+
 module.exports = class PlayersRegistry {
     constructor(config) {
         this._config = config;
@@ -13,13 +15,17 @@ module.exports = class PlayersRegistry {
         return this._config.maxPlayers;
     }
 
-    findPlayer(id) {
+    find(id) {
         return this._players[id] || null;
     }
 
     add(id, name) {
         if (this._numPlayers >= this._config.maxPlayers) {
             throw new Error('Max players reached.');
+        }
+
+        if (name.length < this._config.playerNameMinLength || name.length > this._config.playerNameMaxLength) {
+            throw new Error(`Player name must be between ${this._config.playerNameMinLength} and ${this._config.playerNameMaxLength} characters.`);
         }
 
         let player = new Player(id, name);

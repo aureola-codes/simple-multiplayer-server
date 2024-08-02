@@ -1,9 +1,6 @@
-const chai = require('chai');
+const { expect } = require('chai');
 const sinon = require('sinon');
-const expect = chai.expect;
 
-
-const Match = require('../../src/models/Match');
 const MatchesRegistry = require('../../src/registries/MatchesRegistry');
 
 describe('MatchesRegistry', function() {

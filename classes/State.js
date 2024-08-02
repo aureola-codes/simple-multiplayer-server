@@ -34,12 +34,19 @@ module.exports = class State {
     }
 
     addPlayer(id, name) {
-        if (!this._players.hasOwnProperty(id)) {
-            this._players[id] = new Player(id, name);
-            this._numPlayers++;
+        if (this._numPlayers >= this._config.maxPlayers) {
+            return null;
         }
 
-        return this._players[id];
+        let player = new Player(id, name);
+        if (this._players.hasOwnProperty(id)) {
+            return null;
+        }
+
+        this._players[id] = player;
+        this._numPlayers++;
+
+        return player;
     }
 
     removePlayer(id) {
@@ -56,14 +63,19 @@ module.exports = class State {
     }
 
     addMatch(matchData, player) {
-        let match = new Match(matchData, player);
-        if (!this._matches.hasOwnProperty(match.id)) {
-            this._matches[match.id] = match;
-            this._numMatches++;
-            return match;
+        if (this._numMatches >= this._config.maxMatches) {
+            return null;
         }
 
-        return null;
+        let match = new Match(matchData, player);
+        if (this._matches.hasOwnProperty(match.id)) {
+            return null;
+        }
+
+        this._matches[match.id] = match;
+        this._numMatches++;
+
+        return match;
     }
 
     removeMatch(id) {

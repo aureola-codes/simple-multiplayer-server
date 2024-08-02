@@ -24,10 +24,19 @@ io.on('connection', socket => {
         return;
     }
 
-    socket._player = state.addPlayer(socket.id, 'Player');
+    let player = state.addPlayer(socket.id, 'Player');
+    if (!player) {
+        socket.emit('error', 'Unable to register player.');
+        socket.disconnect(true);
+
+        console.warn(`Player ${socket.id} already exists.`);
+        return;
+    }
+
+    socket._player = player;
 
     socket.emit('init', {
-        player: socket._player.getFullResponse(),
+        player: player.getFullResponse(),
         status: state.status
     });
 

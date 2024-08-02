@@ -35,12 +35,12 @@ module.exports = class State {
 
     addPlayer(id, name) {
         if (this._numPlayers >= this._config.maxPlayers) {
-            return null;
+            throw new Error('Max players reached.');
         }
 
         let player = new Player(id, name);
         if (this._players.hasOwnProperty(id)) {
-            return null;
+            throw new Error('Player already exists.');
         }
 
         this._players[id] = player;
@@ -64,12 +64,12 @@ module.exports = class State {
 
     addMatch(matchData, player) {
         if (this._numMatches >= this._config.maxMatches) {
-            return null;
+            throw new Error('Max matches reached.');
         }
 
         let match = new Match(matchData, player);
         if (this._matches.hasOwnProperty(match.id)) {
-            return null;
+            throw new Error('Match already exists.');
         }
 
         this._matches[match.id] = match;

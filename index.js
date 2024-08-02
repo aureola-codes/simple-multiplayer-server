@@ -16,20 +16,14 @@ io.on('connection', socket => {
         return;
     }
 
-    if (state.numPlayers >= config.maxPlayers) {
-        socket.emit('error', 'Server is full.');
+    let player;
+    try {
+        player = state.addPlayer(socket.id, 'Player');
+    } catch (error) {
+        socket.emit('error', error.message);
         socket.disconnect(true);
 
-        console.warn(`Player ${socket.id} cannot join, server is full.`);
-        return;
-    }
-
-    let player = state.addPlayer(socket.id, 'Player');
-    if (!player) {
-        socket.emit('error', 'Unable to register player.');
-        socket.disconnect(true);
-
-        console.warn(`Player ${socket.id} already exists.`);
+        console.warn(error.message);
         return;
     }
 
@@ -280,7 +274,6 @@ io.on('connection', socket => {
 
     function hasMatch() {
         if (!socket._match) {
-            console.log(`Player ${socket._player.id} is not in a match.`);
             return false;
         }
 
@@ -293,7 +286,6 @@ io.on('connection', socket => {
         }
         
         if (!socket._match.isOwner(socket._player.id)) {
-            console.log(`Player ${socket._player.id} does not own match ${socket._match.id}.`);
             return false;
         }
 
@@ -306,7 +298,6 @@ io.on('connection', socket => {
         }
         
         if (socket._match.isOwner(socket._player.id)) {
-            console.log(`Owners ${socket._player.id} cannot send guest requests.`);
             return false;
         }
 

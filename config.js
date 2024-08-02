@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 module.exports = {
-    serverPort: process.env.SERVER_PORT || 9000,
+    port: process.env.PORT || 9000,
     authToken: process.env.AUTH_TOKEN || '',
     maxPlayers: process.env.MAX_PLAYERS || 1000,
     maxMatches: process.env.MAX_MATCHES || 100,

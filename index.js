@@ -298,7 +298,7 @@ io.on('connection', socket => {
     }
 });
 
-io.listen(config.serverPort);
+io.listen(config.port);
 
 function removeMatch(match) {
     for (let player of match.players) {

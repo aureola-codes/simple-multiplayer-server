@@ -1,16 +1,23 @@
 # Simple Multiplayer Server
 
-## Prerequisites
-
-- [Node.js](https://nodejs.org/en/)
-
 ## Installation
 
 ### Local / Development
 
+Prerequisites: [Node.js](https://nodejs.org/en/), [nodemon](https://nodemon.io/)
+
 1. Clone the repository or download the source code.
 2. Run `npm install` in the root directory of the project.
 3. Run `npm start` to start the server.
+4. The server will be available at `http://localhost:9000`.
+
+### Docker
+
+Prerequisites: [Docker](https://www.docker.com/)
+
+1. Clone the repository or download the source code.
+2. Run `docker compose up --build` in the root directory of the project.
+3. The server will be available at `http://localhost:9000`.
 
 ## Configuration
 
@@ -18,7 +25,7 @@ To configure the server, edit the `.env` file in the root directory.
 
 The following configuration options are available:
 
-- `SERVER_PORT`: The port that the websocket server will be served on. (default: `9000`)
+- `PORT`: The port that the websocket server will be served on. (default: `9000`)
 - `AUTH_TOKEN`: An auth token used to authenticate the handshake request. (default: `""`)
 - `MAX_PLAYERS`: Maximum number of players that can be connected to the server. (default: `1000`)
 - `MAX_MATCHES`: Maximum number of matches that can be active on the server. (default: `100`)

@@ -257,14 +257,13 @@ Sends the initial data to the client. The client can use this data to initialize
 | Property | Type | Description |
 | --- | --- | --- |
 | `player` | `Player` | The player that is currently connected to the server. |
-| `matches` | `Match[]` | The list of matches that are currently available. |
 
 Example:
 
 ```javascript
 // Listen for the 'init' event
 socket.on('init', (data) => {
-  const { player, matches } = data;
+  const { player } = data;
 
   // Initialize the game state
   // ...

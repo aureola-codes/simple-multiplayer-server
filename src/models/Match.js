@@ -1,5 +1,3 @@
-const config = require('../config');
-
 module.exports = class Match {
     constructor(id, name, password = '', isPrivate = false, maxPlayers = 0, data = {}) {
         this.id = id;
@@ -36,6 +34,10 @@ module.exports = class Match {
     kickPlayer(playerId) {
         this.blockedPlayers.push(playerId);
         this.removePlayer(playerId);
+    }
+
+    isBlocked(playerId) {
+        return this.blockedPlayers.includes(playerId);
     }
 
     isVisible() {

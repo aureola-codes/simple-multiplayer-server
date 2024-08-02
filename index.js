@@ -28,6 +28,7 @@ io.on('connection', socket => {
     }
 
     socket._player = player;
+    socket._match = null;
 
     socket.emit('init', {
         player: player.getFullResponse(),
@@ -128,7 +129,7 @@ io.on('connection', socket => {
     }
 
     function leaveMatch() {
-        if (!socket._match) {
+        if (!inMatch()) {
             console.log(`Player ${socket._player.id} is not in a match.`);
             return;
         }
@@ -272,36 +273,16 @@ io.on('connection', socket => {
         console.log(`Player ${socket._player.id} disconnected. Reason: ${reason}`);
     }
 
-    function hasMatch() {
-        if (!socket._match) {
-            return false;
-        }
-
-        return true;
+    function inMatch() {
+        return socket._match !== null;
     }
 
     function isMatchOwner() {
-        if (!hasMatch()) {
-            return false;
-        }
-        
-        if (!socket._match.isOwner(socket._player.id)) {
-            return false;
-        }
-
-        return true;
+        return inMatch() && socket._match.isOwner(socket._player.id);
     }
 
     function isMatchGuest() {
-        if (!hasMatch()) {
-            return false;
-        }
-        
-        if (socket._match.isOwner(socket._player.id)) {
-            return false;
-        }
-
-        return true;
+        return inMatch() && !socket._match.isOwner(socket._player.id);
     }
 });
 

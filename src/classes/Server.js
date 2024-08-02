@@ -1,15 +1,22 @@
 const Connection = require('./Connection');
-const State = require('./State');
+const MatchesRegistry = require('../registries/MatchesRegistry');
+const PlayersRegistry = require('../registries/PlayersRegistry');
 
 module.exports = class Server {
     constructor(io, config) {
-        this._config = config;
         this._io = io;
-        this._state = new State(this._config);
+        this._config = config;
+        this._players = new PlayersRegistry(this._config);
+        this._matches = new MatchesRegistry(this._config);
     }
 
     get status() {
-        return this._state.status;
+        return {
+            numPlayers: this._players.numPlayers,
+            maxPlayers: this._players.maxPlayers,
+            numMatches: this._matches.numMatches,
+            maxMatches: this._matches.maxMatches,
+        }
     }
 
     init() {
@@ -70,7 +77,7 @@ module.exports = class Server {
 
     emitMatchesUpdated(room = 'lobby') {
         this._io.to(room).emit('matches-updated', {
-            matches: this._state.getVisibleMatches()
+            matches: this._matches.getListVisible()
         });
     }
 
@@ -90,7 +97,7 @@ module.exports = class Server {
     registerPlayer(socket) {
         let player;
         try {
-            player = this._state.addPlayer(socket.id, 'Player');
+            player = this._players.add(socket.id, 'Player');
         } catch (error) {
             socket.emit('error', error.message);
             socket.disconnect(true);
@@ -102,11 +109,11 @@ module.exports = class Server {
     }
 
     removePlayer(player) {
-        this._state.removePlayer(player.id);
+        this._players.remove(player.id);
     }
 
     registerMatch(matchData, player) {
-        let match = this._state.addMatch(matchData, player);
+        let match = this._matches.add(matchData, player);
         if (match.isVisible()) {
             this.emitMatchesUpdated();
         }
@@ -127,19 +134,30 @@ module.exports = class Server {
             }
         }
 
-        this._state.removeMatch(match.id);
+        this._matches.remove(match.id);
         if (match.isVisible) {
             this.emitMatchesUpdated();
         }
     }
 
     joinMatch(matchId, password, player) {
-        let joinedMatch = this._state.findMatch(matchId);
+        let joinedMatch = this._matches.find(matchId);
         if (!joinedMatch) {
             throw 'Match not found.';
         }
 
-        joinedMatch.authorize(player, password);
+        if (joinedMatch.password !== '' && joinedMatch.password !== password) {
+            throw 'Match password mismatch.';
+        }
+
+        if (joinedMatch.numPlayers >= joinedMatch.maxPlayers) {
+            throw 'Match full.';
+        }
+
+        if (joinedMatch.blockedPlayers.includes(player.id)) {
+            throw 'Player blocked.';
+        }
+
         joinedMatch.addPlayer(player);
 
         this.emitPlayerJoined(joinedMatch.room, player);

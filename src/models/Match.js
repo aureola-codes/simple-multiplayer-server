@@ -22,22 +22,6 @@ module.exports = class Match {
         this.blockedPlayers = [];
     }
 
-    authorize(player, password) {
-        if (this.password !== "" && this.password !== password) {
-            throw new Error("Match password mismatch.");
-        }
-
-        if (this.numPlayers >= this.maxPlayers) {
-            throw new Error("Match full.");
-        }
-
-        if (this.blockedPlayers.includes(player.id)) {
-            throw new Error("Player blocked.");
-        }
-
-        return this;
-    }
-
     addPlayer(playerData) {
         this.players.push(playerData);
         this.numPlayers++;

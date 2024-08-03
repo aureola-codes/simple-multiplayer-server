@@ -60,8 +60,13 @@ describe('MatchesRegistry', function() {
             expect(() => registry.add(matchData, player)).to.throw(`Match name must be between ${config.matchNameMinLength} and ${config.matchNameMaxLength} characters.`);
         });
 
-        it('should throw an error if match password length is invalid', function() {
+        it('should throw an error if match password length is too short', function() {
             const matchData = { name: 'validName', password: 'short' };
+            expect(() => registry.add(matchData, player)).to.throw(`Match password must be between ${config.matchPasswordMinLength} and ${config.matchPasswordMaxLength} characters.`);
+        });
+
+        it('should throw an error if match password length is too long', function() {
+            const matchData = { name: 'validName', password: 'a'.repeat(config.matchPasswordMaxLength + 1) };
             expect(() => registry.add(matchData, player)).to.throw(`Match password must be between ${config.matchPasswordMinLength} and ${config.matchPasswordMaxLength} characters.`);
         });
 
@@ -73,6 +78,20 @@ describe('MatchesRegistry', function() {
 
             expect(newMatch).to.include(match);
             expect(registry.numMatches).to.equal(1);
+        });
+
+        it('should make sure maxPlayers stays within allowed range', function() {
+            const player1 = { id: 'player1' };
+            const player2 = { id: 'player2' };
+
+            const matchData1 = { name: 'validName', maxPlayers: config.maxPlayersPerMatch + 1 };
+            const matchData2 = { name: 'validName', maxPlayers: 0 };
+
+            const newMatch1 = registry.add(matchData1, player1);
+            const newMatch2 = registry.add(matchData2, player2);
+
+            expect(newMatch1).to.include({ maxPlayers: config.maxPlayersPerMatch });
+            expect(newMatch2).to.include({ maxPlayers: config.maxPlayersPerMatch });
         });
 
         it('should throw an error if match already exists', function() {

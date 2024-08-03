@@ -156,7 +156,7 @@ module.exports = class Server {
             throw 'Match not found.';
         }
 
-        if (joinedMatch.password !== '' && joinedMatch.password !== password) {
+        if (joinedMatch.password && joinedMatch.password !== password) {
             throw 'Match password mismatch.';
         }
 

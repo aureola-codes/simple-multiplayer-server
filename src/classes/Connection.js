@@ -10,10 +10,6 @@ module.exports = class Connection {
         return this._socket._match ? this._socket._match.room : 'lobby';
     }
 
-    set room(room) {
-        this._socket._match.room = room
-    }
-
     get player() {
         return this._socket._player;
     }

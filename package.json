@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "type": "commonjs",
   "scripts": {
+    "watch": "nodemon src/index.js",
     "start": "node src/index.js",
     "test": "mocha './tests/**/*.test.js'",
     "test:coverage": "nyc --reporter=html --reporter=text mocha './tests/**/*.test.js'"

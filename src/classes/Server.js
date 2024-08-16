@@ -153,19 +153,19 @@ module.exports = class Server {
     joinMatch(matchId, password, player) {
         let joinedMatch = this._matches.find(matchId);
         if (!joinedMatch) {
-            throw 'Match not found.';
+            throw new Error('Match not found.');
         }
 
         if (joinedMatch.password && joinedMatch.password !== password) {
-            throw 'Match password mismatch.';
+            throw new Error('Match password mismatch.');
         }
 
         if (joinedMatch.numPlayers >= joinedMatch.maxPlayers) {
-            throw 'Match full.';
+            throw new Error('Match full.');
         }
 
         if (joinedMatch.blockedPlayers.includes(player.id)) {
-            throw 'Player blocked.';
+            throw new Error('Player blocked.');
         }
 
         joinedMatch.addPlayer(player);

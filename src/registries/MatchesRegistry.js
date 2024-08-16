@@ -21,29 +21,29 @@ module.exports = class MatchesRegistry {
 
     add(matchData, player) {
         if (this._numMatches >= this._config.maxMatches) {
-            throw 'Max matches reached.';
+            throw new Error('Max matches reached.');
         }
 
         let { name, password, isPrivate, maxPlayers, data } = matchData;
         if (name === undefined) {
-            throw 'Match name is required.';
+            throw new Error('Match name is required.');
         }
 
         if (name.length < this._config.matchNameMinLength || name.length > this._config.matchNameMaxLength) {
-            throw `Match name must be between ${this._config.matchNameMinLength} and ${this._config.matchNameMaxLength} characters.`;
+            throw new Error(`Match name must be between ${this._config.matchNameMinLength} and ${this._config.matchNameMaxLength} characters.`);
         }
 
-        if (password !== undefined && (password.length < this._config.matchPasswordMinLength || password.length > this._config.matchPasswordMaxLength)) {
-            throw `Match password must be between ${this._config.matchPasswordMinLength} and ${this._config.matchPasswordMaxLength} characters.`;
+        if (password && (password.length < this._config.matchPasswordMinLength || password.length > this._config.matchPasswordMaxLength)) {
+            throw new Error(`Match password must be between ${this._config.matchPasswordMinLength} and ${this._config.matchPasswordMaxLength} characters.`);
         }
 
-        if (maxPlayers !== undefined && (maxPlayers < 0 || maxPlayers > this._config.maxPlayersPerMatch)) {
+        if (maxPlayers && (maxPlayers < 0 || maxPlayers > this._config.maxPlayersPerMatch)) {
             maxPlayers = this._config.maxPlayersPerMatch;
         }
 
         let match = new Match(player.id, name, password || '', isPrivate || false, maxPlayers || this._config.maxPlayersPerMatch, data || {});
         if (this._matches.hasOwnProperty(match.id)) {
-            throw 'Match already exists.';
+            throw new Error('Match already exists.');
         }
 
         this._matches[match.id] = match;

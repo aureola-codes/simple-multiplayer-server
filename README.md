@@ -58,17 +58,19 @@ Events that can be sent from the client to the server.
 Send a chat message to the server. The message will be broadcasted to all players 
 in the same match or lobby as the sender. Messages will not be stored on the server.
 
-**Important:** Messages that are too short will be dropped. Messages that are too long will be truncated.
+Messages that are too short will be dropped. Messages that are too long will be truncated.
 
 | Property  | Type                | Description                      |
 |-----------|---------------------|----------------------------------|
 | `message` | `string` `required` | The message that should be sent. |
 
+**Important:** This event expects a single string parameter, not an object.
+
 Example:
     
 ```javascript
 // Send a chat message to the server
-socket.emit('chat-message', { message: 'Hello, World!' });
+socket.emit('chat-message', 'Hello, World!');
 ``` 
 
 #### Event: `status` (+ acknowledgment)

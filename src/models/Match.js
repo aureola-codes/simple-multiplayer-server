@@ -4,6 +4,9 @@ module.exports = class Match {
         this.name = name;
         this.data = data;
         this.password = password;
+
+        this.isStarted = false;
+        this.isFinished = false;
         this.isPrivate = isPrivate;
         this.isProtected = this.password !== '';
 
@@ -41,7 +44,9 @@ module.exports = class Match {
     }
 
     isVisible() {
-        return !this.isPrivate;
+        return !this.isPrivate 
+            && !this.isStarted 
+            && !this.isFinished;
     }
 
     isOwner(playerId) {

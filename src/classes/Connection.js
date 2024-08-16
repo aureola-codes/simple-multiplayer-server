@@ -154,7 +154,8 @@ module.exports = class Connection {
             console.warn(`Match ${this.match.id} is not started.`);
             return;
         }
-
+        
+        this.match.isFinished = true;
         this._server.emitMatchFinished(this.match.room);
         if (this.match.isVisible()) {
             this._server.emitMatchesUpdated();

@@ -19,6 +19,14 @@ module.exports = class Server {
         }
     }
 
+    get players() {
+        return this._players.getList();
+    }
+
+    get matches() {
+        return this._matches.getListVisible();
+    }
+
     init() {
         this._io.on('connection', socket => {
             console.log(`Player ${socket.id} connected.`);

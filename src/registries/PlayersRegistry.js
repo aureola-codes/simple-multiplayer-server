@@ -47,4 +47,10 @@ module.exports = class PlayersRegistry {
         delete this._players[id];
         this._numPlayers--;
     }
+
+    getList() {
+        return Object
+            .values(this._players)
+            .map(player => player.getMinResponse());
+    }
 }

@@ -130,6 +130,11 @@ module.exports = class Connection {
             return;
         }
 
+        if (!this.match.allPlayersReady()) {
+            console.warn(`Match ${this.match.id} cannot be started because not all players are ready.`);
+            return;
+        }
+
         const wasVisible = this.match.isVisible();
         this.match.isStarted = true;
 

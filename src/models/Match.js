@@ -48,6 +48,16 @@ module.exports = class Match {
         return this.owner === playerId;
     }
 
+    allPlayersReady() {
+        for (let player of this.players) {
+            if (!player.isReady) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     hasPlayer(playerId) {
         return this.players.some(player => player.id === playerId);
     }

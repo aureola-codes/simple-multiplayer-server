@@ -19,6 +19,17 @@ module.exports = class MatchesRegistry {
         return this._matches[id] || null;
     }
 
+    findByName(name) {
+        name = name.toLowerCase();
+        for (let match of Object.values(this._matches)) {
+            if (match.name.toLowerCase() === name) {
+                return match;
+            }
+        }
+
+        return null;
+    }
+
     add(matchData, player) {
         if (this._numMatches >= this._config.maxMatches) {
             throw new Error('Max matches reached.');
@@ -37,13 +48,17 @@ module.exports = class MatchesRegistry {
             throw new Error(`Match password must be between ${this._config.matchPasswordMinLength} and ${this._config.matchPasswordMaxLength} characters.`);
         }
 
+        if (this.findByName(name) !== null) {
+            throw new Error('Match with the same name already exists.');
+        }
+
         if (maxPlayers && (maxPlayers < 0 || maxPlayers > this._config.maxPlayersPerMatch)) {
             maxPlayers = this._config.maxPlayersPerMatch;
         }
 
         let match = new Match(player.id, name, password || '', isPrivate || false, maxPlayers || this._config.maxPlayersPerMatch, data || {});
         if (this._matches.hasOwnProperty(match.id)) {
-            throw new Error('Match already exists.');
+            throw new Error('Match with the same id already exists.');
         }
 
         this._matches[match.id] = match;

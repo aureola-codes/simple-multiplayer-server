@@ -105,17 +105,20 @@ module.exports = class Connection {
 
         if (this.isMatchOwner()) {
             this._server.cancelMatch(this.match);
-        } else {
-            const isVisible = this.match.isVisible();
-            const playerData = this.playerDataFull;
+            return;
+        }
 
-            this.match.removePlayer(this.player);
+        const room = this.match.room;
+        const isVisible = this.match.isVisible();
+        const playerData = this.playerDataFull;
 
-            this._server.resetSocket(this._socket);
-            this._server.emitPlayerLeft(this.match.room, playerData);
-            if (isVisible) {
-                this._server.emitMatchesUpdated();
-            }
+        this.match.removePlayer(this.player);
+
+        this._server.resetSocket(this._socket);
+        this._server.emitPlayerLeft(room, playerData);
+        
+        if (isVisible) {
+            this._server.emitMatchesUpdated();
         }
     }
 
@@ -209,22 +212,30 @@ module.exports = class Connection {
         this._server.emitPlayerUpdated(this.room, this.inMatch() ? this.playerDataFull : this.playerDataMin);
     }
 
-    tick(tickData) {
+    tick(tickDataJson) {
         if (!this.isMatchGuest()) {
             console.warn(`Player ${this.player.id} tried to send tick without permission.`);
             return;
         }
 
-        this._server.emitTick(this.match.owner, tickData);
+        try {
+            this._server.emitTick(this.match.owner, JSON.parse(tickDataJson));
+        } catch (error) {
+            console.error('ERROR: Invalid data received.', tockDataJson);
+        }
     }
 
-    tock(tockData) {
+    tock(tockDataJson) {
         if (!this.isMatchOwner()) {
             console.warn(`Player ${this.player.id} tried to send tock without permission.`);
             return;
         }
 
-        this._server.emitTock(this.match.room, tockData);
+        try {
+            this._server.emitTock(this.match.room, JSON.parse(tockDataJson));
+        } catch (error) {
+            console.error('ERROR: Invalid data received.', tockDataJson);
+        }
     }
 
     disconnect(reason) {

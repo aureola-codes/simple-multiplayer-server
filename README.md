@@ -378,6 +378,22 @@ socket.on('match-canceled', () => {
 });
 ```
 
+#### Event: `player-updated`
+
+Sends an updated match object to the client. The client can use this event to update the match object in the game state.
+
+See: [Match](#player)
+
+Example:
+
+```javascript
+// Listen for the 'match-updated' event
+socket.on('match-updated', (match) => {
+  // Update the match object in the game state
+  // ...
+});
+```
+
 #### Event: `player-joined`
 
 Sends a notification to the client that a player has joined the match. The client can use this event to update the list of players in the match.
@@ -388,9 +404,7 @@ Example:
 
 ```javascript
 // Listen for the 'player-joined' event
-socket.on('player-joined', (data) => {
-  const { player } = data;
-
+socket.on('player-joined', (player) => {
   // Update the list of players in the match
   // ...
 });
@@ -406,9 +420,7 @@ Example:
 
 ```javascript
 // Listen for the 'player-left' event
-socket.on('player-left', (data) => {
-  const { player } = data;
-
+socket.on('player-left', (player) => {
   // Update the list of players in the match
   // ...
 });
@@ -424,9 +436,7 @@ Example:
 
 ```javascript
 // Listen for the 'player-updated' event
-socket.on('player-updated', (data) => {
-  const { player } = data;
-
+socket.on('player-updated', (player) => {
   // Update the player object in the game state
   // ...
 });
@@ -442,9 +452,7 @@ Example:
 
 ```javascript
 // Listen for the 'player-kicked' event
-socket.on('player-kicked', (data) => {
-  const { player } = data;
-
+socket.on('player-kicked', (player) => {
   // Update the list of players in the match
   // ...
 });

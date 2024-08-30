@@ -87,7 +87,7 @@ module.exports = class Match {
             isProtected: this.isProtected,
             numPlayers: this.numPlayers,
             maxPlayers: this.maxPlayers,
-            players: this.players
+            players: this.players.map(player => player.getFullResponse())
         };
     }
 }

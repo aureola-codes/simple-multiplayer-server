@@ -77,6 +77,10 @@ module.exports = class Server {
         this._io.to(room).emit('player-updated', player);
     }
 
+    emitMatchUpdated(room, match) {
+        this._io.to(room).emit('match-updated', match);
+    }
+
     emitMatchStarted(room) {
         this._io.to(room).emit('match-started');
     }
@@ -179,6 +183,8 @@ module.exports = class Server {
         joinedMatch.addPlayer(player);
 
         this.emitPlayerJoined(joinedMatch.room, player);
+        this.emitMatchUpdated(joinedMatch.room, joinedMatch);
+
         if (joinedMatch.isVisible()) {
             this.emitMatchesUpdated();
         }

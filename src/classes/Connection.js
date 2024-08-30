@@ -116,6 +116,7 @@ module.exports = class Connection {
 
         this._server.resetSocket(this._socket);
         this._server.emitPlayerLeft(room, playerData);
+        this._server.emitMatchUpdated(room, this.matchDataFull);
         
         if (isVisible) {
             this._server.emitMatchesUpdated();
@@ -191,6 +192,8 @@ module.exports = class Connection {
         }
 
         this._server.emitPlayerKicked(this.match.room, playerData);
+        this._server.emitMatchUpdated(this.match.room, this.matchDataFull);
+
         if (this.match.isVisible()) {
             this._server.emitMatchesUpdated();
         }
@@ -210,6 +213,9 @@ module.exports = class Connection {
         this.player.isReady = playerData.isReady !== undefined ? playerData.isReady : this.player.isReady;
 
         this._server.emitPlayerUpdated(this.room, this.inMatch() ? this.playerDataFull : this.playerDataMin);
+        if (this.inMatch()) {
+            this._server.emitMatchUpdated(this.room, this.matchDataFull);
+        }
     }
 
     tick(tickDataJson) {

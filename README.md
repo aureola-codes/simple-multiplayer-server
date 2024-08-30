@@ -272,23 +272,16 @@ socket.on('init', (data) => {
 });
 ```
 
-#### Event: `alert`
+#### Event: `error`
 
-Sends an alert to the client. Alerts are used to notify the client about important events. Alerts can be used to notify the client about maintenance, warnings, server errors or other important events.
-
-| Property  | Type     | Description                                                |
-|-----------|----------|------------------------------------------------------------|
-| `type`    | `string` | The type of the alert. Types: `error`, `warning`, `status` |
-| `message` | `string` | The message that should be displayed.                      |
+Sends an error message to the client.
 
 Example:
 
 ```javascript
-// Listen for the 'alert' event
-socket.on('alert', (data) => {
-  const { type, message } = data;
-
-  // Display the alert to the player
+// Listen for the 'error' event
+socket.on('error', (message) => {
+  // Display the message to the player
   // ...
 });
 ```

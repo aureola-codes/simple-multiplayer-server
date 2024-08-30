@@ -256,9 +256,11 @@ Events that are sent from the server to the client.
 
 Sends the initial data to the client. The client can use this data to initialize the game state. The initial data includes the player & the list of matches.
 
-| Property | Type     | Description                                           |
-|----------|----------|-------------------------------------------------------|
-| `player` | `Player` | The player that is currently connected to the server. |
+| Property   | Type       | Description                                           |
+|------------|------------|-------------------------------------------------------|
+| `player`   | `Player`   | The player that is currently connected to the server. |
+| `matches`  | `Match[]`  | The list of matches that are currently available.     |
+| `settings` | `Settings` | The settings of the server.                           |
 
 Example:
 
@@ -508,16 +510,16 @@ socket.on('tock', (data) => {
 
 ### Match
 
-| Property      | Type           | Description                                                                         |
-|---------------|----------------|-------------------------------------------------------------------------------------|
-| `id`          | `string`       | The unique identifier of the match.                                                 |
-| `name`        | `string`       | The name of the match.                                                              |
-| `isPrivate`   | `boolean`      | Whether the match is private. Private matches won't show up in the list of matches. |
-| `isProtected` | `boolean`      | Whether the match is protected by a password.                                       |
-| `numPlayers`  | `number`       | The number of players that are currently in the match.                              |
-| `maxPlayers`  | `number`       | The maximum number of players that can be in the match.                             |
-| `data`        | `object` `*`   | An object that can be used to store additional data.                                |
-| `players`     | `Player[]` `*` | The players that are currently in the match.                                        |
+| Property      | Type           | Description                                                   |
+|---------------|----------------|---------------------------------------------------------------|
+| `id`          | `string`       | The unique identifier of the match.                           |
+| `name`        | `string`       | The name of the match.                                        |
+| `isPrivate`   | `boolean`      | Whether the match is private. Private matches are not listed. |
+| `isProtected` | `boolean`      | Whether the match is protected by a password.                 |
+| `numPlayers`  | `number`       | The number of players that are currently in the match.        |
+| `maxPlayers`  | `number`       | The maximum number of players that can be in the match.       |
+| `data`        | `object` `*`   | An object that can be used to store additional data.          |
+| `players`     | `Player[]` `*` | The players that are currently in the match.                  |
 
 `*`: Only available when in a / the same match. Not in lists.
 
@@ -529,6 +531,20 @@ socket.on('tock', (data) => {
 | `maxPlayers` | `number` | The maximum number of players that can be connected to the server. |
 | `numMatches` | `number` | The number of matches that are currently active on the server.     |
 | `maxMatches` | `number` | The maximum number of matches that can be active on the server.    |
+
+### Settings
+
+| Property                 | Type     | Description                              |
+|--------------------------|----------|------------------------------------------|
+| `chatMinLength`          | `number` | The minimum length of chat messages.     |
+| `chatMaxLength`          | `number` | The maximum length of chat messages.     |
+| `matchNameMinLength`     | `number` | The minimum length of match names.       |
+| `matchNameMaxLength`     | `number` | The maximum length of match names.       |
+| `matchPasswordMinLength` | `number` | The minimum length of match passwords.   |
+| `matchPasswordMaxLength` | `number` | The maximum length of match passwords.   |
+| `playerNameMinLength`    | `number` | The minimum length of player names.      |
+| `playerNameMaxLength`    | `number` | The maximum length of player names.      |
+| `maxPlayersPerMatch`     | `number` | The maximum number of players per match. |
 
 ## Support
 

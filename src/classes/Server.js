@@ -19,6 +19,18 @@ module.exports = class Server {
         }
     }
 
+    get settings() {
+        return {
+            chatMinLength: this._config.chatMinLength,
+            chatMaxLength: this._config.chatMaxLength,
+            matchNameMinLength: this._config.matchNameMinLength,
+            matchNameMaxLength: this._config.matchNameMaxLength,
+            matchPasswordMinLength: this._config.matchPasswordMinLength,
+            matchPasswordMaxLength: this._config.matchPasswordMaxLength,
+            maxPlayersPerMatch: this._config.maxPlayersPerMatch,
+        }
+    }
+
     get players() {
         return this._players.getList();
     }

@@ -51,10 +51,13 @@ module.exports = class Connection {
         this._socket.on('tock', this.tock.bind(this));
         this._socket.on('disconnect', this.disconnect.bind(this));
 
-        this._socket.emit('init', {player: this.playerDataFull});
-        this._socket.join('lobby');
+        this._socket.emit('init', {
+            player: this.playerDataFull,
+            matches: this._server.matches,
+            settings: this._server.settings,
+        });
 
-        this._server.emitMatchesUpdated(this._socket.id);
+        this._socket.join('lobby');
     }
 
     sendChatMessage(message) {

@@ -228,7 +228,10 @@ module.exports = class Connection {
         }
 
         try {
-            this._server.emitTick(this.match.owner, JSON.parse(tickDataJson));
+            let tickData = JSON.parse(tickDataJson);
+            tickData.player = this.player.id;
+
+            this._server.emitTick(this.match.owner, tickData);
         } catch (error) {
             console.error('ERROR: Invalid data received.', tockDataJson);
         }
@@ -241,7 +244,10 @@ module.exports = class Connection {
         }
 
         try {
-            this._server.emitTock(this.match.room, JSON.parse(tockDataJson));
+            let tockData = JSON.parse(tockDataJson);
+            tockData.player = this.player.id;
+
+            this._server.emitTock(this.match.room, tockData);
         } catch (error) {
             console.error('ERROR: Invalid data received.', tockDataJson);
         }

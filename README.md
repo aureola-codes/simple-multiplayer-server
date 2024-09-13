@@ -239,7 +239,6 @@ Send a tock to the server. The server will either broadcast the tock to all play
 |-----------|---------------------|-------------------------------------------------------------------|
 | `type`    | `string` `required` | The type of the tock. Default: `tock`                             |
 | `data`    | `object` `required` | Context data that should be sent with the tock.                   |
-| `player`  | `string` `optional` | The unique identifier of the player that should receive the tock. |
 
 Example:
 
@@ -461,6 +460,7 @@ Sends a tick to the client. Only the owner of the match will receive the tick. T
 |-----------|----------|-------------------------------------------|
 | `type`    | `string` | The type of the tick.                     |
 | `data`    | `object` | Context data that was sent with the tick. |
+| `player`  | `Player` | The player that sent the tick.            |
 
 Example:
 
@@ -482,6 +482,7 @@ Sends a tock to the client. Only guests of the match will receive the tock. The 
 |-----------|----------|-------------------------------------------|
 | `type`    | `string` | The type of the tock.                     |
 | `data`    | `object` | Context data that was sent with the tock. |
+| `player`  | `Player` | The player that sent the tick.            |
 
 Example:
 

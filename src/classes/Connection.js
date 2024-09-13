@@ -31,10 +31,18 @@ module.exports = class Connection {
     }
 
     get matchDataFull() {
+        if (!this.match) {
+            return null;
+        }
+
         return this.match.getFullResponse();
     }
 
     get matchDataMin() {
+        if (!this.match) {
+            return null;
+        }
+
         return this.match.getMinResponse();
     }
 
@@ -107,7 +115,12 @@ module.exports = class Connection {
         }
 
         if (this.isMatchOwner()) {
-            this._server.cancelMatch(this.match);
+            if (!this.match.isFinished) {
+                this._server.cancelMatch(this.match);
+            } else {
+                this._server.removeMatch(this.match);
+            }
+
             return;
         }
 
@@ -230,11 +243,6 @@ module.exports = class Connection {
     }
 
     tick(tickDataJson) {
-        if (!this.isMatchGuest()) {
-            console.warn(`Player ${this.player.id} tried to send tick without permission.`);
-            return;
-        }
-
         try {
             let tickData = JSON.parse(tickDataJson);
             tickData.player = this.player.id;

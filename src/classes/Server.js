@@ -97,8 +97,8 @@ module.exports = class Server {
         this._io.to(room).emit('match-started');
     }
 
-    emitMatchFinished(room) {
-        this._io.to(room).emit('match-finished');
+    emitMatchFinished(room, finishData) {
+        this._io.to(room).emit('match-finished', finishData);
     }
 
     emitTick(room, tickData) {

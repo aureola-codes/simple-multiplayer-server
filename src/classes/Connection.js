@@ -151,7 +151,15 @@ module.exports = class Connection {
         }
     }
 
-    finishMatch() {
+    finishMatch(finishMatchJson) {
+        let finishMatchData;
+        try {
+            finishMatchData = JSON.parse(finishMatchJson);
+        } catch (error) {
+            console.error('ERROR: Invalid data received.', finishMatchJson);
+            return;
+        }
+
         if (!this.isMatchOwner()) {
             console.warn(`Player ${this.player.id} tried to finish match ${this.match.id} without permission.`);
             return;
@@ -163,7 +171,7 @@ module.exports = class Connection {
         }
         
         this.match.isFinished = true;
-        this._server.emitMatchFinished(this.match.room);
+        this._server.emitMatchFinished(this.match.room, finishMatchData);
         if (this.match.isVisible()) {
             this._server.emitMatchesUpdated();
         }

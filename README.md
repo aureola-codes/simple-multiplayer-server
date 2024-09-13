@@ -348,11 +348,15 @@ socket.on('match-started', () => {
 
 Sends a notification to the client that the match has finished. The client can use this event to stop the game loop and to stop sending ticks to the server. The client can also use this event to return to the lobby.
 
+| Property | Type     | Description                                   |
+|----------|----------|-----------------------------------------------|
+| `data`   | `string` | Context data that can be sent with the event. |
+
 Example:
 
 ```javascript
 // Listen for the 'match-finished' event
-socket.on('match-finished', () => {
+socket.on('match-finished', (response) => {
   // Stop the game loop
   // ...
 });
